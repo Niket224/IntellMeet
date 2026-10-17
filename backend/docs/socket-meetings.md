@@ -4,6 +4,8 @@ This contract adds transient rooms to the authenticated Socket.IO server. It doe
 not change REST enrollment, meeting lifecycle, workspace policy, or persisted
 participants. Authentication and active JWT expiry are described in
 [socket-authentication.md](socket-authentication.md).
+Phase 5 chat reuses these room/session checks and the same per-socket operation
+queue; its contract is in [socket-chat.md](socket-chat.md).
 
 ## Admission and lifecycle ownership
 
@@ -270,4 +272,5 @@ Room tests use real Socket.IO clients; the integration suite uses real REST
 enrollment, JWTs, MongoDB models, and workspace-membership fixtures.
 
 Browser UI behavior still needs manual multi-tab/two-browser verification by
-Developer 2. Chat, WebRTC signaling/media, transcription, and AI are outside this phase.
+Developer 2. Chat is added separately in Phase 5; WebRTC signaling/media,
+transcription, and AI remain outside the implemented scope.

@@ -129,23 +129,26 @@ function registerMeetingHandlers(io, socket, presence) {
     }
   }
 
-  function register(event, handler) {
+  function register(event, handler, options = {}) {
+    const parse = options.parse || meetingIdFrom;
+    const formatFailure = options.failure || failure;
     socket.on(event, (payload, acknowledge) => {
       // No acknowledgment means no operation, preventing unconfirmed joins.
       if (typeof acknowledge !== "function") return;
       if (pending >= MAX_PENDING_REQUESTS) {
-        acknowledge(failure(new MeetingRequestError("MEETING_BUSY")));
+        acknowledge(formatFailure(options.busyError
+          ? options.busyError() : new MeetingRequestError("MEETING_BUSY")));
         return;
       }
       pending += 1;
       queue = queue.then(async () => {
         try {
           requireSession(socket);
-          const meetingId = meetingIdFrom(payload);
-          const data = await handler(meetingId);
+          const input = parse(payload);
+          const data = await handler(input);
           if (socket.connected) acknowledge({ ok: true, data });
         } catch (error) {
-          if (socket.connected) acknowledge(failure(error));
+          if (socket.connected) acknowledge(formatFailure(error));
         } finally {
           pending -= 1;
         }
@@ -183,15 +186,37 @@ function registerMeetingHandlers(io, socket, presence) {
     return { meetingId, left: await leaveCurrent() };
   });
 
-  register("meeting:roster", async (meetingId) => {
-    if (presence.getMembership(socket.id)?.meetingId !== meetingId) {
+  function requireJoined(meetingId) {
+    const userId = requireSession(socket);
+    const current = presence.getMembership(socket.id);
+    if (current?.meetingId !== meetingId || current.userId !== userId
+      || !socket.rooms.has(roomName(meetingId))) {
       throw new MeetingRequestError("MEETING_NOT_JOINED");
     }
+    return current;
+  }
+
+  async function authorizeJoined(meetingId) {
+    requireJoined(meetingId);
     await authorize(meetingId);
+    return requireJoined(meetingId);
+  }
+
+  register("meeting:roster", async (meetingId) => {
+    await authorizeJoined(meetingId);
     return presence.snapshot(meetingId);
   });
 
   socket.once("disconnect", removePresence);
+
+  return {
+    registerRequest: register,
+    requireJoined,
+    authorizeJoined,
+    parseMeetingId: meetingIdFrom,
+    roomName,
+    formatAccessError: (error) => error instanceof MeetingRequestError ? failure(error) : null
+  };
 }
 
 module.exports = registerMeetingHandlers;

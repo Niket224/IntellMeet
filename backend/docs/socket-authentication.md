@@ -128,4 +128,5 @@ dedicated database-name prefixes and validate the connected database before
 cleanup. Never point them at an application database.
 
 Meeting rooms and participant presence are implemented separately in Phase 4.
-Chat, WebRTC, AI, and transcription remain outside the implemented scope.
+Phase 5 chat is documented in [socket-chat.md](socket-chat.md).
+WebRTC, AI, and transcription remain outside the implemented scope.

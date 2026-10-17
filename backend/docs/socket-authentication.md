@@ -4,6 +4,9 @@ The backend uses one HTTP server for Express and Socket.IO. Socket connections
 now require the same JWT issued by the existing REST registration/login APIs.
 REST authentication, token generation, models, and meeting policies are unchanged.
 
+Phase 4 meeting rooms use this authentication contract; their event and presence
+contract is documented in [socket-meetings.md](socket-meetings.md).
+
 ## Connection payload for Developer 2
 
 ```js
@@ -124,5 +127,5 @@ Integration suites skip when `TEST_MONGODB_URI` is absent. They require their
 dedicated database-name prefixes and validate the connected database before
 cleanup. Never point them at an application database.
 
-Meeting rooms, participant presence, chat, WebRTC, AI, and transcription are not
-implemented in this phase.
+Meeting rooms and participant presence are implemented separately in Phase 4.
+Chat, WebRTC, AI, and transcription remain outside the implemented scope.

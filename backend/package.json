@@ -6,10 +6,12 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test": "node --test test/socket.initialization.test.js test/socket.auth.test.js",
+    "test": "node --test test/socket.initialization.test.js test/socket.auth.test.js test/socket.meeting.test.js",
     "test:auth": "node --test test/socket.auth.test.js",
     "test:auth:integration": "node --test test/socket.auth.integration.test.js",
-    "test:rest": "node --test test/rest.integration.test.js"
+    "test:rest": "node --test test/rest.integration.test.js",
+    "test:meeting": "node --test test/socket.meeting.test.js",
+    "test:meeting:integration": "node --test test/socket.meeting.integration.test.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

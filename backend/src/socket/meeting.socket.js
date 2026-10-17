@@ -213,6 +213,7 @@ function registerMeetingHandlers(io, socket, presence) {
     registerRequest: register,
     requireJoined,
     authorizeJoined,
+    authorizePeer: authorizeMeeting,
     parseMeetingId: meetingIdFrom,
     roomName,
     formatAccessError: (error) => error instanceof MeetingRequestError ? failure(error) : null

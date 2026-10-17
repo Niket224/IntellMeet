@@ -272,5 +272,6 @@ Room tests use real Socket.IO clients; the integration suite uses real REST
 enrollment, JWTs, MongoDB models, and workspace-membership fixtures.
 
 Browser UI behavior still needs manual multi-tab/two-browser verification by
-Developer 2. Chat is added separately in Phase 5; WebRTC signaling/media,
-transcription, and AI remain outside the implemented scope.
+Developer 2. Chat is added separately in Phase 5. Phase 6 signaling uses the same
+request queue and presence; see [socket-webrtc.md](socket-webrtc.md).
+WebRTC media processing, transcription, and AI remain outside the implemented scope.

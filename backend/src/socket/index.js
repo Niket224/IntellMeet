@@ -4,6 +4,7 @@ const { authenticateSocket } = require("./auth.socket");
 const registerConnectionHandlers = require("./connection.socket");
 const createPresenceStore = require("./presence.store");
 const createChatState = require("./chat.state");
+const createWebrtcState = require("./webrtc.state");
 
 function initializeSocket(server) {
   const io = new Server(server, {
@@ -11,9 +12,13 @@ function initializeSocket(server) {
   });
 
   const chatState = createChatState();
-  server.once("close", () => chatState.close());
+  const webrtcState = createWebrtcState();
+  server.once("close", () => {
+    chatState.close();
+    webrtcState.close();
+  });
   io.use(authenticateSocket);
-  registerConnectionHandlers(io, createPresenceStore(), chatState);
+  registerConnectionHandlers(io, createPresenceStore(), chatState, webrtcState);
   return io;
 }
 

@@ -18,7 +18,11 @@ function createPresenceStore() {
 
   function getMembership(socketId) {
     const membership = sockets.get(socketId);
-    return membership ? { ...membership } : null;
+    return membership ? { meetingId: membership.meetingId, userId: membership.userId } : null;
+  }
+
+  function getMembershipRevision(socketId) {
+    return sockets.get(socketId)?.joinedRevision ?? null;
   }
 
   function add(meetingId, userId, socketId) {
@@ -38,7 +42,7 @@ function createPresenceStore() {
       meeting.users.set(userId, userSockets);
     }
     userSockets.add(socketId);
-    sockets.set(socketId, { meetingId, userId });
+    sockets.set(socketId, { meetingId, userId, joinedRevision: revision + 1 });
     meeting.revision = ++revision;
     return true;
   }
@@ -57,7 +61,7 @@ function createPresenceStore() {
     return roster;
   }
 
-  return { add, remove, getMembership, snapshot };
+  return { add, remove, getMembership, getMembershipRevision, snapshot };
 }
 
 module.exports = createPresenceStore;

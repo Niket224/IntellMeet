@@ -129,4 +129,5 @@ cleanup. Never point them at an application database.
 
 Meeting rooms and participant presence are implemented separately in Phase 4.
 Phase 5 chat is documented in [socket-chat.md](socket-chat.md).
-WebRTC, AI, and transcription remain outside the implemented scope.
+Phase 6 signaling is documented in [socket-webrtc.md](socket-webrtc.md).
+WebRTC media processing, AI, and transcription remain outside the implemented scope.

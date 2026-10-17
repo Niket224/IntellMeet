@@ -236,4 +236,5 @@ npm run test:rest
 Integration suites skip without `TEST_MONGODB_URI`, require their dedicated
 database-name prefix, and validate the connected database before cleanup.
 No WebRTC signaling, AI, transcription, recording, or message persistence is
-implemented in Phase 5.
+implemented in Phase 5. Phase 6 signaling is documented separately in
+[socket-webrtc.md](socket-webrtc.md) and shares meeting/chat request ordering.

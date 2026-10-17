@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const createCorsOptions = require("./config/cors");
 
 const authRoutes = require("./routes/auth.routes");
 const userRoutes = require("./routes/user.routes");
@@ -10,18 +11,7 @@ const { notFound, errorHandler } = require("./middleware/error.middleware");
 
 const app = express();
 
-const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
-  .split(",")
-  .map((origin) => origin.trim());
-
-app.use(cors({
-  origin(origin, callback) {
-    // Permit requests without an Origin header (e.g. curl/Postman) and configured frontend origins.
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error("Origin not allowed by CORS"));
-  },
-  credentials: true
-}));
+app.use(cors(createCorsOptions()));
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
 

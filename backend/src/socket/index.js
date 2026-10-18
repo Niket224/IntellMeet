@@ -1,3 +1,5 @@
+
+const { setIo } = require("./io");
 const { Server } = require("socket.io");
 const createCorsOptions = require("../config/cors");
 const { authenticateSocket } = require("./auth.socket");
@@ -19,6 +21,7 @@ function initializeSocket(server) {
   });
   io.use(authenticateSocket);
   registerConnectionHandlers(io, createPresenceStore(), chatState, webrtcState);
+  setIo(io);
   return io;
 }
 

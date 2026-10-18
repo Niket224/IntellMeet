@@ -1,3 +1,4 @@
+const { withMeetingLock } = require("./meeting.lifecycle");
 const mongoose = require("mongoose");
 const Meeting = require("../models/Meeting");
 const Workspace = require("../models/Workspace");
@@ -158,7 +159,8 @@ function registerMeetingHandlers(io, socket, presence) {
     });
   }
 
-  register("meeting:join", async (meetingId) => {
+  register("meeting:join", async (meetingId) =>
+  withMeetingLock(meetingId, async () => {
     const current = presence.getMembership(socket.id);
     if (current && current.meetingId !== meetingId) throw new MeetingRequestError("MEETING_CONFLICT");
     await authorize(meetingId);
@@ -178,7 +180,8 @@ function registerMeetingHandlers(io, socket, presence) {
     const roster = presence.snapshot(meetingId);
     broadcast(roster);
     return { ...roster, socketId: socket.id, joined: true };
-  });
+  })
+);
 
   register("meeting:leave", async (meetingId) => {
     const current = presence.getMembership(socket.id);

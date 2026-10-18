@@ -199,11 +199,33 @@ function registerMeetingHandlers(io, socket, presence) {
     return current;
   }
 
+
   async function authorizeJoined(meetingId) {
-    requireJoined(meetingId);
+    try {
+      requireJoined(meetingId);
+    } catch (error) {
+      if (!(error instanceof MeetingRequestError)
+        || error.code !== "MEETING_NOT_JOINED") {
+        throw error;
+      }
+
+      // Check the meeting state so an ended meeting still returns
+      // MEETING_ENDED after its sockets have been removed from the room.
+      try {
+        await authorize(meetingId);
+      } catch (authorizationError) {
+        if (authorizationError.code === "MEETING_ENDED") {
+          throw authorizationError;
+        }
+      }
+
+      throw error;
+    }
+
     await authorize(meetingId);
     return requireJoined(meetingId);
   }
+
 
   register("meeting:roster", async (meetingId) => {
     await authorizeJoined(meetingId);

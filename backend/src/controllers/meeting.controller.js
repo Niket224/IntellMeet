@@ -142,7 +142,9 @@ async function endMeeting(req, res, next) {
         message: "The host has ended this meeting"
       });
 
-      io.in(room).disconnectSockets(true);
+      // Remove sockets from the meeting room without disconnecting them.
+      // They can still receive MEETING_ENDED acknowledgments.
+      await io.in(room).socketsLeave(room);
 
       return meeting;
     });

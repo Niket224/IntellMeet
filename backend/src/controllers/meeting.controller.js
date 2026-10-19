@@ -1,3 +1,6 @@
+const { getIo } = require("../socket/io");
+const { withMeetingLock } = require("../socket/meeting.lifecycle");
+
 const mongoose = require("mongoose");
 const Meeting = require("../models/Meeting");
 const Workspace = require("../models/Workspace");
@@ -110,16 +113,55 @@ async function endMeeting(req, res, next) {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(400).json({ message: "Invalid meeting ID" });
     }
-    const meeting = await Meeting.findOne({ _id: req.params.id, host: req.user._id });
-    if (!meeting) return res.status(404).json({ message: "Meeting not found or you are not the host" });
 
-    meeting.status = "ended";
-    meeting.endedAt = new Date();
-    await meeting.save();
-    res.json({ message: "Meeting ended", meeting });
+    const meetingId = req.params.id.toLowerCase();
+
+    await withMeetingLock(meetingId, async () => {
+      const meeting = await Meeting.findOne({
+        _id: meetingId,
+        host: req.user._id
+      });
+
+      if (!meeting) {
+        const error = new Error("Meeting not found or you are not the host");
+        error.status = 404;
+        throw error;
+      }
+
+      if (meeting.status !== "ended") {
+        meeting.status = "ended";
+        meeting.endedAt = new Date();
+        await meeting.save();
+      }
+
+      const io = getIo();
+      const room = `meeting:${meetingId}`;
+
+      io.to(room).emit("meeting:ended", {
+        meetingId,
+        message: "The host has ended this meeting"
+      });
+
+      // Remove sockets from the meeting room without disconnecting them.
+      // They can still receive MEETING_ENDED acknowledgments.
+      await io.in(room).socketsLeave(room);
+
+      return meeting;
+    });
+
+    res.json({ message: "Meeting ended" });
   } catch (error) {
+    if (error.status === 404) {
+      return res.status(404).json({ message: error.message });
+    }
     next(error);
   }
 }
 
-module.exports = { listMeetings, createMeeting, getMeeting, joinMeeting, endMeeting };
+module.exports = {
+  listMeetings,
+  createMeeting,
+  getMeeting,
+  joinMeeting,
+  endMeeting
+};
